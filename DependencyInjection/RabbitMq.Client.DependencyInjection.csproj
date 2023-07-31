@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Abstractions\Routy.Shared.RabbitMq.Abstractions.csproj" />
-    <ProjectReference Include="..\Implementations\Routy.Shared.RabbitMq.Implementations.csproj" />
+    <ProjectReference Include="..\Abstractions\RabbitMq.Client.Abstractions.csproj" />
+    <ProjectReference Include="..\Implementations\RabbitMq.Client.Implementations.csproj" />
   </ItemGroup>
 
 </Project>

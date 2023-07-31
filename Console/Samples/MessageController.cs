@@ -1,11 +1,14 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RabbitMq.Client.Abstractions.Controllers;
 using RabbitMQ.Client.Events;
 
-namespace Controllers.Samples;
+namespace Console.Samples;
 
 public class MessageController : BrokerControllerBase
 {
     private readonly ILogger<MessageController> _logger;
+    public ICurrentContext Context => ServiceProvider.GetRequiredService<ICurrentContext>();
 
     public MessageController(ILogger<MessageController> logger)
     {

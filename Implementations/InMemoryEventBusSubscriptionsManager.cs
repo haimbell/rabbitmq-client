@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using RabbitMq.Client.Abstractions;
+using RabbitMq.Client.Abstractions.MessageHandlers;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Implementations;
 
 public class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
 {
@@ -8,7 +10,6 @@ public class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManage
     private readonly ConcurrentDictionary<string, Type> _eventTypes = new();
 
     public void AddSubscription<T, TH>(string queueName, string eventName)
-        //where T : new()
         where TH : IMessageHandler
     {
         var key = $"{queueName}_{eventName}";
@@ -42,10 +43,10 @@ public class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManage
     public IEnumerable<SubscriptionInfo> GetHandlersForEvent(string queueName, string eventName)
         => _handlers[$"{queueName}_{eventName}"].ToList();
 
-
     public bool HasSubscriptionsForEvent(string queueName, string eventName)
         => _handlers.ContainsKey($"{queueName}_{eventName}");
-    public Type GetEventTypeByName(string queueName, string eventName)
+   
+    public Type? GetEventTypeByName(string queueName, string eventName)
     {
         _eventTypes.TryGetValue($"{queueName}_{eventName}", out var eventType);
         return eventType;

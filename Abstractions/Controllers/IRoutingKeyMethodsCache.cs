@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Controllers;
+namespace RabbitMq.Client.Abstractions.Controllers;
 
 public interface IRoutingKeyMethodsCache
 {

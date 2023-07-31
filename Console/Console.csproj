@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,8 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Controllers\Controllers.csproj" />
-    <ProjectReference Include="..\DependencyInjection\Routy.Shared.RabbitMq.DependencyInjection.csproj" />
+    <ProjectReference Include="..\DependencyInjection\RabbitMq.Client.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

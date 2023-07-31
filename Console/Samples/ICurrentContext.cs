@@ -1,4 +1,4 @@
-namespace Crawler.WebApi.RabbitMq;
+namespace Console.Samples;
 
 public interface ICurrentContext
 {

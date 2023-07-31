@@ -1,16 +1,19 @@
-using Controllers;
+using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using RabbitMQ.Client;
+using RabbitMq.Client.Abstractions;
+using RabbitMq.Client.Abstractions.Controllers;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using Serilog.Context;
-using System.Reflection;
-using System.Text;
+using RabbitMq.Client.Abstractions.IntegrationEvents;
+using RabbitMq.Client.Abstractions.MessageHandlers;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Core;
 
 public class RabbitMqConsumer : IDisposable
 {

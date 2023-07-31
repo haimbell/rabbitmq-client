@@ -1,4 +1,4 @@
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Abstractions;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class RoutingKeyAttribute : Attribute

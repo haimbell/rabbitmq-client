@@ -1,7 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RabbitMq.Client.Core;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Implementations;
 
 public class RabbitMqConsumerManager : IDisposable
 {
@@ -42,13 +43,6 @@ public class RabbitMqConsumerManager : IDisposable
                 _consumers[queueId].Add(consumer);
                 _logger.LogInformation("RabbitMq consumer is started.");
             }
-            //var producer = scope.ServiceProvider.GetRequiredService<RabbitMqProducer>();
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    producer.Publish(new AccountCreatedIntegrationEvent(), "fake_name");
-            //    producer.Publish(new AccountCreatedIntegrationEvent());
-            //}
-
             return Task.CompletedTask;
         }
         catch (Exception ex)
@@ -73,11 +67,6 @@ public class RabbitMqConsumerManager : IDisposable
                 op.Exchange = exchange;
             });
             consumer.Migrate();
-
-            //consumer.AddSubscription<AccountCreatedIntegrationEvent, AccountCreatedIntegrationEventHandler>
-            //    ("fake_name");
-            //consumer.AddSubscription<AccountCreatedIntegrationEvent, AccountCreatedMessageHandler>
-            //    (nameof(AccountCreatedIntegrationEvent));
         }
         catch (Exception ex)
         {

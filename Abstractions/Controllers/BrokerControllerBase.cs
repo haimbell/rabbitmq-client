@@ -1,11 +1,8 @@
-﻿using Crawler.WebApi.RabbitMq;
-
-namespace Controllers;
+﻿namespace RabbitMq.Client.Abstractions.Controllers;
 
 public class BrokerControllerBase
 {
     public IServiceProvider ServiceProvider { get; private set; }
-    public ICurrentContext? Context => (ICurrentContext?)ServiceProvider.GetService(typeof(ICurrentContext));
 
     public void SetServiceProvider(IServiceProvider serviceProvider)
     {

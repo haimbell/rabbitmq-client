@@ -1,8 +1,8 @@
-using Crawler.WebApi.RabbitMq;
 using Microsoft.Extensions.Logging;
+using RabbitMq.Client.Abstractions.MessageHandlers;
 using RabbitMQ.Client.Events;
 
-namespace Controllers.Samples;
+namespace Console.Samples;
 
 public class AccountCreatedMessageHandler : IMessageHandler<AccountCreatedIntegrationEvent>
 {

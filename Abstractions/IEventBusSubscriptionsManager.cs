@@ -1,4 +1,6 @@
-namespace Crawler.WebApi.RabbitMq;
+using RabbitMq.Client.Abstractions.MessageHandlers;
+
+namespace RabbitMq.Client.Abstractions;
 
 public interface IEventBusSubscriptionsManager
 {

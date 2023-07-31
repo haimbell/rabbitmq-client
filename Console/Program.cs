@@ -1,13 +1,15 @@
-﻿using Controllers.Samples;
-using Crawler.WebApi.RabbitMq;
+﻿using System.Reflection;
+using System.Text;
+using Console;
+using Console.Samples;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RabbitMq.Client.Core;
+using RabbitMq.Client.DependencyInjection;
 using RabbitMQ.Client.Events;
-using System.Reflection;
-using System.Text;
 
-Console.WriteLine("Hello, World!");
+System.Console.WriteLine("Hello, World!");
 
 var builder = CreateHostBuilder(args);
 
@@ -81,10 +83,13 @@ static string GetTenantId(BasicDeliverEventArgs eventArgs)
     }
 }
 
-internal class CurrentContext : ICurrentContext
+namespace Console
 {
-    public string CorrelationId { get; set; }
-    public string TenantId { get; set; }
+    internal class CurrentContext : ICurrentContext
+    {
+        public string CorrelationId { get; set; }
+        public string TenantId { get; set; }
+    }
 }
 //var logger = serviceProvider.GetService<ILoggerFactory>()
 //    .CreateLogger<Program>();

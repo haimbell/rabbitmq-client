@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Core;
 
 public class RabbitMqConfigurator : IDisposable
 {

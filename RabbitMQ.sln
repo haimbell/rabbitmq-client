@@ -5,17 +5,13 @@ VisualStudioVersion = 17.7.33808.371
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "Console\Console.csproj", "{DBE87FBD-14AD-4832-A2FB-C6200E4AF95F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Routy.Shared.RabbitMq.Core", "Core\Routy.Shared.RabbitMq.Core.csproj", "{8BAE0D54-1B37-4F96-8E45-DEF9828819E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.Core", "Core\RabbitMq.Client.Core.csproj", "{8BAE0D54-1B37-4F96-8E45-DEF9828819E1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{A44D23DD-B32E-43C4-908C-68E1A104B246}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.DependencyInjection", "DependencyInjection\RabbitMq.Client.DependencyInjection.csproj", "{1DD1EEB5-2FC4-427C-88DE-4111FB464F1D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Routy.Shared.RabbitMq.DependencyInjection", "DependencyInjection\Routy.Shared.RabbitMq.DependencyInjection.csproj", "{1DD1EEB5-2FC4-427C-88DE-4111FB464F1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.Abstractions", "Abstractions\RabbitMq.Client.Abstractions.csproj", "{7EAC984E-B81C-415E-81D9-AAA0EC64CA66}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Routy.Shared.RabbitMq.Abstractions", "Abstractions\Routy.Shared.RabbitMq.Abstractions.csproj", "{7EAC984E-B81C-415E-81D9-AAA0EC64CA66}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Routy.Shared.RabbitMq.Implementations", "Implementations\Routy.Shared.RabbitMq.Implementations.csproj", "{6058121F-952E-4B97-9EE0-99EB04E54741}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Controllers", "Controllers\Controllers.csproj", "{C0D4EA50-1080-4D0D-97BE-DE39A621F635}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.Implementations", "Implementations\RabbitMq.Client.Implementations.csproj", "{6058121F-952E-4B97-9EE0-99EB04E54741}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,10 +39,6 @@ Global
 		{6058121F-952E-4B97-9EE0-99EB04E54741}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6058121F-952E-4B97-9EE0-99EB04E54741}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6058121F-952E-4B97-9EE0-99EB04E54741}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C0D4EA50-1080-4D0D-97BE-DE39A621F635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C0D4EA50-1080-4D0D-97BE-DE39A621F635}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C0D4EA50-1080-4D0D-97BE-DE39A621F635}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C0D4EA50-1080-4D0D-97BE-DE39A621F635}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

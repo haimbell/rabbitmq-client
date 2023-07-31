@@ -1,7 +1,12 @@
 using Newtonsoft.Json;
+using RabbitMq.Client.Abstractions.IntegrationEvents;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace Console.Samples;
 
+/// <summary>
+/// Backwards compatibility
+/// </summary>
+[Obsolete]
 public class IntegrationEvent: IIntegrationEvent
 {
     public IntegrationEvent() :

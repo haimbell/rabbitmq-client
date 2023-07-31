@@ -1,13 +1,14 @@
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using RabbitMQ.Client;
+using RabbitMq.Client.Abstractions;
 using RabbitMQ.Client.Exceptions;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Text;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Core;
 
 public class RabbitMqProducer
 {

@@ -1,13 +1,13 @@
-using Controllers;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using RabbitMq.Client.Abstractions.Controllers;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Implementations;
 
 public class RoutingKeyMethodsCache : IRoutingKeyMethodsCache
 {
     private readonly Dictionary<string, ExcutionMethod> _methods = new();
-  
+
     public void Add(MethodInfo methodInfo)
     {
         ExcutionMethod excutionMethod = new(methodInfo);
@@ -53,11 +53,10 @@ public class RoutingKeyMethodsCache : IRoutingKeyMethodsCache
             }
         }
         excutionMethod.Params = excutionMethodParams.ToArray();
-        //var key = $"{messageHandlerAttribute.Queue}/{messageHandlerAttribute.RoutingKey}";
         if (_methods.TryGetValue(excutionMethod.Key, out ExcutionMethod? method))
         {
             throw new ArgumentException(
-                $"RoutingKey '{method.RoutingKey}' of Queue '{method.Queue}' is already handled by '{method.MethodInfo.Name}' from '{method.MethodInfo.DeclaringType.Name}' ")
+                $"RoutingKey '{method.RoutingKey}' of Queue '{method.Queue}' is already handled by '{method.MethodInfo.Name}' from '{method.MethodInfo.DeclaringType?.Name}' ")
             {
                 Data =
                 {
@@ -74,5 +73,4 @@ public class RoutingKeyMethodsCache : IRoutingKeyMethodsCache
         _methods.TryGetValue($"{exchange}/{queue}/{routingKey}", out var methodInfo) ? methodInfo : null;
 
     public IEnumerable<ExcutionMethod> GetAll() => _methods.Values;
-
 }

@@ -1,4 +1,4 @@
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.Abstractions.MessageHandlers;
 
 public interface IMessageHandler { };
 public interface IMessageHandler<in T> : IMessageHandler

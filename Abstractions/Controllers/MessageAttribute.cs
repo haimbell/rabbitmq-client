@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Controllers;
+﻿namespace RabbitMq.Client.Abstractions.Controllers;
 
 [AttributeUsage(AttributeTargets.Parameter)]
 public sealed class MessageAttribute : Attribute

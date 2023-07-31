@@ -1,4 +1,4 @@
-namespace Controllers.Samples;
+namespace Console.Samples;
 
 public interface IFakeService
 {

@@ -1,7 +1,7 @@
-using Crawler.WebApi.RabbitMq;
 using Microsoft.Extensions.Logging;
+using RabbitMq.Client.Abstractions.IntegrationEvents;
 
-namespace Controllers.Samples;
+namespace Console.Samples;
 
 public class AccountCreatedIntegrationEventHandler : IIntegrationEventHandler<AccountCreatedIntegrationEvent>
 {

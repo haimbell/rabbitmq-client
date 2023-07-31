@@ -1,4 +1,4 @@
-﻿namespace Controllers;
+﻿namespace RabbitMq.Client.Abstractions.Controllers;
 
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class MessageHandlerAttribute : Attribute

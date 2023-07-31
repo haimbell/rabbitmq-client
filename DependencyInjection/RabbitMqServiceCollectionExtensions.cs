@@ -1,8 +1,14 @@
-using Controllers;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using RabbitMq.Client.Abstractions;
+using RabbitMq.Client.Abstractions.Controllers;
+using RabbitMq.Client.Abstractions.IntegrationEvents;
+using RabbitMq.Client.Abstractions.MessageHandlers;
+using RabbitMq.Client.Core;
+using RabbitMq.Client.Implementations;
+using RabbitMq.Client.Implementations.Serializers;
 
-namespace Crawler.WebApi.RabbitMq;
+namespace RabbitMq.Client.DependencyInjection;
 
 public static class RabbitMqServiceCollectionExtensions
 {
@@ -40,41 +46,12 @@ public static class RabbitMqServiceCollectionExtensions
         }
         return services;
     }
-    //public static IServiceProvider AddConsumer(this IServiceProvider services, string exchange, string queue, int consumersCount = 1, string clientName = null, CancellationToken stoppingToken = default)
-    //{
-    //    var consumerManager = services.GetRequiredService<RabbitMqConsumerManager>();
-    //    consumerManager.AddConsumers(exchange, queue, consumersCount, clientName, stoppingToken);
-    //    return services;
-    //}
-
-    //public static IEnumerable<MethodInfo> GetMethodInfos(this Type type)
-    //{
-    //    var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-    //    foreach (var method in methods)
-    //    {
-    //        //get all parameters in method
-    //        var parameters = method.GetParameters();
-    //        foreach (var parameter in parameters)
-    //        {
-    //            //get all attributes in parameter
-    //            var attributes = parameter.GetCustomAttributes();
-    //            foreach (var attribute in attributes)
-    //            {
-    //                //if attribute is MessageAttribute
-    //                if (attribute is MessageAttribute messageAttribute)
-    //                {
-    //                    yield return method;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    //register the controller as service
-    //}
+    
     public static IServiceCollection UseRabbitMq(this IServiceCollection services, Assembly? assembly = null, Action<RabbitMqServerOptions> options = null)
     {
         services.AddSingleton<IRoutingKeyMethodsCache, RoutingKeyMethodsCache>()
             .AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>()
-            .AddSingleton<IJsonSerializer, JsonSerializer>()
+            .AddSingleton<IJsonSerializer, NewtonsoftJsonSerializer>()
             .AddSingleton<RabbitMqConsumerManager>()
             .AddTransient<RabbitMqConsumer>()
             .AddTransient<RabbitMqProducer>();

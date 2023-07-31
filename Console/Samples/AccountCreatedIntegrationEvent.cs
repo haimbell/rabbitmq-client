@@ -1,6 +1,7 @@
-using Crawler.WebApi.RabbitMq;
+using RabbitMq.Client.Abstractions;
+using RabbitMq.Client.Implementations;
 
-namespace Controllers.Samples;
+namespace Console.Samples;
 
 [RoutingKey(nameof(AccountCreatedIntegrationEvent))]
 public class AccountCreatedIntegrationEvent : IntegrationEvent { }
