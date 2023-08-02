@@ -8,7 +8,7 @@ public class RabbitMqConsumerManager : IDisposable
 {
     private readonly ILogger<RabbitMqConsumerManager> _logger;
     private readonly IServiceProvider _provider;
-    private readonly Dictionary<string, List<RabbitMqConsumer>> _consumers = new();
+    private readonly List<RabbitMqConsumer> _consumers = new();
 
     public RabbitMqConsumerManager(ILogger<RabbitMqConsumerManager> logger, IServiceProvider provider)
     {
@@ -27,9 +27,6 @@ public class RabbitMqConsumerManager : IDisposable
             for (int i = 0; i < consumersCount; i++)
             {
                 var consumer = scope.ServiceProvider.GetRequiredService<RabbitMqConsumer>();
-                var queueId = $"{exchange}_{queue}";
-                if (!_consumers.ContainsKey(queueId))
-                    _consumers.Add(queueId, new List<RabbitMqConsumer>());
                 consumer.Configure((op) =>
                 {
                     op.ClientProvidedName = clientName;
@@ -40,7 +37,7 @@ public class RabbitMqConsumerManager : IDisposable
                 });
 
                 consumer.StartConsuming(stoppingToken);
-                _consumers[queueId].Add(consumer);
+                _consumers.Add(consumer);
                 _logger.LogInformation("RabbitMq consumer is started.");
             }
             return Task.CompletedTask;
@@ -51,7 +48,6 @@ public class RabbitMqConsumerManager : IDisposable
             throw;
         }
     }
-
 
     private void RegisterEvents(IServiceScope scope, string exchange, string queue, string clientName)
     {
@@ -77,7 +73,7 @@ public class RabbitMqConsumerManager : IDisposable
 
     public void Dispose()
     {
-        foreach (var consumer in _consumers.Values.SelectMany(consumers => consumers))
+        foreach (var consumer in _consumers)
         {
             consumer.Dispose();
         }

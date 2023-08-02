@@ -1,12 +1,13 @@
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMq.Client.Abstractions;
 using RabbitMq.Client.Abstractions.Controllers;
 using RabbitMq.Client.Abstractions.IntegrationEvents;
 using RabbitMq.Client.Abstractions.MessageHandlers;
 using RabbitMq.Client.Core;
+using RabbitMq.Client.Core.Connection;
 using RabbitMq.Client.Implementations;
 using RabbitMq.Client.Implementations.Serializers;
+using System.Reflection;
 
 namespace RabbitMq.Client.DependencyInjection;
 
@@ -26,12 +27,12 @@ public static class RabbitMqServiceCollectionExtensions
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
             foreach (var method in methods)
             {
-                if(method.GetCustomAttribute<MessageHandlerAttribute>() == null)
+                if (method.GetCustomAttribute<MessageHandlerAttribute>() == null)
                     continue;
                 keyMethodsCache.Add(method);
             }
         }
-   
+
         return services;
     }
 
@@ -46,12 +47,13 @@ public static class RabbitMqServiceCollectionExtensions
         }
         return services;
     }
-    
+
     public static IServiceCollection UseRabbitMq(this IServiceCollection services, Assembly? assembly = null, Action<RabbitMqServerOptions> options = null)
     {
         services.AddSingleton<IRoutingKeyMethodsCache, RoutingKeyMethodsCache>()
             .AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>()
             .AddSingleton<IJsonSerializer, NewtonsoftJsonSerializer>()
+            .AddTransient<IRabitMqPersistenceConnection, RabitMqPersistenceConnection>()
             .AddSingleton<RabbitMqConsumerManager>()
             .AddTransient<RabbitMqConsumer>()
             .AddTransient<RabbitMqProducer>();

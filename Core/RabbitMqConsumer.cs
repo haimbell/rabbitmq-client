@@ -1,84 +1,48 @@
-using System.Reflection;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly;
-using RabbitMQ.Client;
 using RabbitMq.Client.Abstractions;
 using RabbitMq.Client.Abstractions.Controllers;
-using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Exceptions;
-using Serilog.Context;
 using RabbitMq.Client.Abstractions.IntegrationEvents;
 using RabbitMq.Client.Abstractions.MessageHandlers;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using Serilog.Context;
+using System.Reflection;
+using System.Text;
+using RabbitMq.Client.Core.Connection;
 
 namespace RabbitMq.Client.Core;
 
 public class RabbitMqConsumer : IDisposable
 {
-    private readonly IOptions<RabbitMqServerOptions> _serverOptions;
+    private readonly IRabitMqPersistenceConnection _rabitMqPersistenceConnection;
     private readonly IOptions<RabbitMqConsumerOptions> _consumerOptions;
+    private readonly IOptions<RabbitMqServerOptions> _serverOptions;
     private readonly ILogger<RabbitMqConsumer> _logger;
-    private IConnection _connection;
-    private IModel _channel;
     private string QueueName => _consumerOptions.Value.QueueName;
     private readonly IEventBusSubscriptionsManager _subsManager;
     private readonly IServiceProvider _serviceProvider;
     private readonly IJsonSerializer _jsonSerializer;
+    public bool IsConnected => _rabitMqPersistenceConnection.IsConnected && _channel.IsOpen;
 
-    public RabbitMqConsumer(IOptions<RabbitMqServerOptions> serverOptions, IOptions<RabbitMqConsumerOptions> consumerOptions, ILogger<RabbitMqConsumer> logger,
+    public RabbitMqConsumer(IRabitMqPersistenceConnection rabitMqPersistenceConnection, IOptions<RabbitMqConsumerOptions> consumerOptions, ILogger<RabbitMqConsumer> logger,
         IEventBusSubscriptionsManager subsManager, IServiceProvider serviceProvider,
-        IJsonSerializer jsonSerializer)
+        IJsonSerializer jsonSerializer, IOptions<RabbitMqServerOptions> serverOptions)
     {
-        _serverOptions = serverOptions;
-        _consumerOptions = consumerOptions;
+        _rabitMqPersistenceConnection = rabitMqPersistenceConnection;
         _logger = logger;
         _subsManager = subsManager;
         _serviceProvider = serviceProvider;
         _jsonSerializer = jsonSerializer;
-        var factory = new ConnectionFactory
-        {
+        _consumerOptions = consumerOptions;
+        _serverOptions = serverOptions;
 
-            Port = serverOptions.Value.Port.GetValueOrDefault(AmqpTcpEndpoint.UseDefaultPort),
-            UserName = serverOptions.Value.UserName,
-            Password = serverOptions.Value.Password,
-            VirtualHost = serverOptions.Value.VirtualHost,
-            ClientProvidedName = serverOptions.Value.ClientProvidedName,
-            AutomaticRecoveryEnabled = serverOptions.Value.AutomaticRecoveryEnabled,
-            RequestedConnectionTimeout = new TimeSpan(30000),
-            RequestedHeartbeat = new TimeSpan(60),
-            NetworkRecoveryInterval = TimeSpan.FromSeconds(5),
-            TopologyRecoveryEnabled = true,
-            DispatchConsumersAsync = true,
-            ContinuationTimeout = TimeSpan.FromSeconds(10),
-            EndpointResolverFactory = endpoints =>
-            {
-                string[] hostNames = serverOptions.Value.HostNames;
-                return hostNames is { Length: > 0 } ?
-                    new DefaultEndpointResolver(serverOptions.Value.HostNames.Select(ep =>
-                        new AmqpTcpEndpoint(ep, serverOptions.Value.Port.GetValueOrDefault(-1))))
-                    : (IEndpointResolver)new DefaultEndpointResolver(endpoints);
-            }
-        };
-        //use polly to retry connection 5 time with 5 sec delay
-        var retryPolicy = Policy.Handle<BrokerUnreachableException>()
-            .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5), (ex, time) =>
-            {
-                _logger.LogError(ex, "Could not connect to RabbitMQ after {TimeOut}s ({ExceptionMessage})",
-                                       $"{time.TotalSeconds:n1}", ex.Message);
-            });
-
-        retryPolicy.Execute(() =>
-        {
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-        });
-        //_connection = factory.CreateConnection();
-        //_channel = _connection.CreateModel();
+        _channel = _rabitMqPersistenceConnection.CreateModel();
     }
 
-    public void Configure(Action<RabbitMqServerOptions> configureServer, Action<RabbitMqConsumerOptions> configureConsumer)
+    public void Configure(Action<RabbitMqServerOptions> configureServer,
+        Action<RabbitMqConsumerOptions> configureConsumer)
     {
         configureServer(_serverOptions.Value);
         configureConsumer(_consumerOptions.Value);
@@ -118,6 +82,8 @@ public class RabbitMqConsumer : IDisposable
     }
 
     private CancellationToken _cancellationToken;
+    private readonly IModel _channel;
+
     public void StartConsuming(CancellationToken cancellationToken = default)
     {
         if (_consumerOptions.Value.QueueName is null)
@@ -241,7 +207,7 @@ public class RabbitMqConsumer : IDisposable
         {
             var methodsParams = PopulateMethodsParams(excutionMethod, message, eventArgs, serviceProvider);
 
-            var controller =(BrokerControllerBase) serviceProvider.GetRequiredService(excutionMethod.MethodInfo.ReflectedType);
+            var controller = (BrokerControllerBase)serviceProvider.GetRequiredService(excutionMethod.MethodInfo.ReflectedType);
             controller.SetServiceProvider(serviceProvider);
             //if method is async execute with await, otherwise execute sync
             if (excutionMethod.MethodInfo.ReturnType != typeof(Task))
@@ -291,12 +257,11 @@ public class RabbitMqConsumer : IDisposable
     public void StopConsuming()
     {
         _channel.Close();
-        _connection.Close();
     }
 
     public void Dispose()
     {
-        _connection.Dispose();
+        _rabitMqPersistenceConnection.Dispose();
         _channel.Dispose();
     }
 }
