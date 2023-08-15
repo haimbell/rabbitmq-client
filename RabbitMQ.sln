@@ -13,6 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.Abstraction
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.Client.Implementations", "Implementations\RabbitMq.Client.Implementations.csproj", "{6058121F-952E-4B97-9EE0-99EB04E54741}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8C730105-AF0A-4E98-B764-A211B65B5A3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{6D86EA0E-5B3B-4460-BB53-FB1673B95D4C}"
+	ProjectSection(SolutionItems) = preProject
+		release.yml = release.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +49,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6D86EA0E-5B3B-4460-BB53-FB1673B95D4C} = {8C730105-AF0A-4E98-B764-A211B65B5A3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46556301-ADC6-41CE-837E-5B02CDED5FA1}
