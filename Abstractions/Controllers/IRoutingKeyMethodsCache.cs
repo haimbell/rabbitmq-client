@@ -4,9 +4,9 @@ namespace RabbitMq.Client.Abstractions.Controllers;
 
 public interface IRoutingKeyMethodsCache
 {
-    void Add( MethodInfo methodInfo);
+    void Add(MethodInfo methodInfo);
     //void Add(string routingKey, MethodInfo methodInfo, string? queue = null);
-    ExcutionMethod? Get(string routingKey, string? queue = null,string? exchange = null);
+    ExcutionMethod? Get(string routingKey, string? queue = null, string? exchange = null);
     IEnumerable<ExcutionMethod> GetAll();
 }
 
@@ -16,7 +16,7 @@ public record ExcutionMethod(MethodInfo MethodInfo)
     public string Exchange { get; set; } = null!;
     public string Queue { get; set; } = null!;
     public string RoutingKey { get; set; } = null!;
-    public ExcutionMethodParam[] Params{ get;  set; }
+    public ExcutionMethodParam[] Params { get; set; }
 }
 
 public enum ExcutionParamSoruce

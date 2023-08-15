@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMq.Client.Abstractions;
 using RabbitMq.Client.Abstractions.Controllers;
-using RabbitMq.Client.Abstractions.IntegrationEvents;
 using RabbitMq.Client.Abstractions.MessageHandlers;
 using RabbitMq.Client.Core;
 using RabbitMq.Client.Core.Connection;
@@ -16,6 +15,7 @@ public static class RabbitMqServiceCollectionExtensions
     public static IServiceProvider AddRabbitMqControllers(this IServiceProvider services, Assembly? assembly = null)
     {
         var keyMethodsCache = services.GetRequiredService<IRoutingKeyMethodsCache>();
+        var subscriptionsManager = services.GetRequiredService<IEventBusSubscriptionsManager>();
         //list all types that implement BrokerControllerBase
         assembly ??= Assembly.GetExecutingAssembly();
         var enumerable = assembly.GetTypes()
@@ -27,9 +27,12 @@ public static class RabbitMqServiceCollectionExtensions
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
             foreach (var method in methods)
             {
-                if (method.GetCustomAttribute<MessageHandlerAttribute>() == null)
+                var messageHandlerAttribute = method.GetCustomAttribute<MessageHandlerAttribute>();
+                if (messageHandlerAttribute == null)
                     continue;
                 keyMethodsCache.Add(method);
+
+                subscriptionsManager.AddSubscription(messageHandlerAttribute.Exchange, messageHandlerAttribute.Queue, messageHandlerAttribute.RoutingKey);
             }
         }
 
@@ -43,11 +46,18 @@ public static class RabbitMqServiceCollectionExtensions
         var excutionMethods = routingKeyMethodsCache.GetAll();
         foreach (var excutionMethod in excutionMethods)
         {
+            consumerManager.BindQueue(excutionMethod.Exchange, excutionMethod.Queue, excutionMethod.Key);
             consumerManager.AddConsumers(excutionMethod.Exchange, excutionMethod.Queue, consumerPerQueue, excutionMethod.Key);
         }
         return services;
     }
-
+    /// <summary>
+    /// Register RabbitMq and all <see cref="BrokerControllerBase"/>
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="assembly">assembly that contains all <see cref="BrokerControllerBase"/> </param>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static IServiceCollection UseRabbitMq(this IServiceCollection services, Assembly? assembly = null, Action<RabbitMqServerOptions> options = null)
     {
         services.AddSingleton<IRoutingKeyMethodsCache, RoutingKeyMethodsCache>()
@@ -99,42 +109,38 @@ public static class RabbitMqServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddHandlers(this IServiceCollection services)
+    /// <summary>
+    /// Register all handlers in the executing assembly
+    /// </summary>
+    public static IServiceCollection AddMessageHandlers(this IServiceCollection services)
     {
-        return services.AddHandlers(Assembly.GetExecutingAssembly())
+        return services.AddMessageHandlers(Assembly.GetExecutingAssembly())
             .AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
     }
 
-    public static IServiceCollection AddHandlers(this IServiceCollection services, Assembly assembly)
+    /// <summary>
+    /// Register all handlers in the given assembly
+    /// </summary>
+    /// <param name="assembly"> assembly that contains handlers </param>
+    public static IServiceCollection AddMessageHandlers(this IServiceCollection services, Assembly assembly)
     {
+        ArgumentNullException.ThrowIfNull(assembly, nameof(assembly));
         var enumerable = assembly.GetTypes()
             .Where(t => t.GetInterfaces().Contains(typeof(IMessageHandler))
                         && !t.IsAbstract);
         //register all types as service
         foreach (var type in enumerable)
         {
-
-            var integrationEvents = type.GetInterfaces()
-                .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>))
+            //get the type of T in interface IMessageHandler<T>
+            var messageType = type.GetInterfaces()
+                .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IMessageHandler<>))
                 .Select(t => t.GetGenericArguments()[0]).FirstOrDefault();
-            if (integrationEvents != null)
-            {
-                var handlerType = typeof(IIntegrationEventHandler<>).MakeGenericType(integrationEvents);
-                services.AddTransient(type);
-                services.AddTransient(handlerType, type);
-
-            }
-            else
-            {
-                //get the type of T in interface IMessageHandler<T>
-                var messageType = type.GetInterfaces()
-                    .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IMessageHandler<>))
-                    .Select(t => t.GetGenericArguments()[0]).FirstOrDefault();
-                //create a IMessageHandler<T> using messageType
-                var handlerType = typeof(IMessageHandler<>).MakeGenericType(messageType);
-                services.AddTransient(type);
-                services.AddTransient(handlerType, type);
-            }
+            if (messageType == null)
+                continue;
+            //create a IMessageHandler<T> using messageType
+            var handlerType = typeof(IMessageHandler<>).MakeGenericType(messageType);
+            services.AddTransient(type);
+            services.AddTransient(handlerType, type);
 
         }
         return services;

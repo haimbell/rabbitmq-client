@@ -3,14 +3,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMq.Client.Abstractions;
 using RabbitMq.Client.Abstractions.Controllers;
-using RabbitMq.Client.Abstractions.IntegrationEvents;
 using RabbitMq.Client.Abstractions.MessageHandlers;
+using RabbitMq.Client.Core.Connection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Serilog.Context;
 using System.Reflection;
 using System.Text;
-using RabbitMq.Client.Core.Connection;
 
 namespace RabbitMq.Client.Core;
 
@@ -63,6 +62,15 @@ public class RabbitMqConsumer : IDisposable
         _logger.LogInformation("Queue {QueueName} declared", QueueName);
     }
 
+    public void AddSubscription(string eventName)
+    {
+        _logger.LogInformation("Adding subscription for ({Queue}) --> ({EventName})"
+            , _consumerOptions.Value.QueueName, eventName);
+
+        _channel.QueueBind(queue: QueueName, exchange: _consumerOptions.Value.Exchange,
+            routingKey: eventName);
+    }
+
     public void AddSubscription<T, TH>(string? eventName = null)
         where TH : IMessageHandler
     {
@@ -76,7 +84,7 @@ public class RabbitMqConsumer : IDisposable
         _logger.LogInformation("Adding subscription for ({Queue}) --> ({EventName})"
             , _consumerOptions.Value.QueueName, eventName);
 
-        _subsManager.AddSubscription<T, TH>(QueueName, eventName);
+        _subsManager.AddSubscription<T, TH>(_consumerOptions.Value.Exchange, QueueName, eventName);
         _channel.QueueBind(queue: QueueName, exchange: _consumerOptions.Value.Exchange,
             routingKey: eventName);
     }
@@ -146,7 +154,7 @@ public class RabbitMqConsumer : IDisposable
             await TriggerControllerMethod(excutionMethod, eventArgs, message, scope.ServiceProvider);
             return true;
         }
-        else if (_subsManager.HasSubscriptionsForEvent(QueueName, eventName))
+        else if (_subsManager.HasSubscriptionsForEvent(_consumerOptions.Value.Exchange, QueueName, eventName))
         {
             await TriggerHandler(eventName, message, eventArgs, scope);
             return true;
@@ -161,7 +169,7 @@ public class RabbitMqConsumer : IDisposable
     private async Task TriggerHandler(string eventName, string message, BasicDeliverEventArgs eventArgs,
         IServiceScope scope)
     {
-        var subscriptions = _subsManager.GetHandlersForEvent(QueueName, eventName);
+        var subscriptions = _subsManager.GetHandlersForEvent(_consumerOptions.Value.Exchange, QueueName, eventName);
         foreach (var subscription in subscriptions)
         {
             _cancellationToken.ThrowIfCancellationRequested();
@@ -172,20 +180,9 @@ public class RabbitMqConsumer : IDisposable
             {
                 var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
                 if (handler == null) continue;
-                var eventType = _subsManager.GetEventTypeByName(QueueName, eventName);
+                var eventType = _subsManager.GetEventTypeByName(_consumerOptions.Value.Exchange, QueueName, eventName);
 
-                if (typeof(IIntegrationEventHandler).IsAssignableFrom(subscription.HandlerType))
-                {
-                    var integrationEvent = GetIntegrationEvent(message, eventType);
-                    using (LogContext.PushProperty("IntegrationEventId", integrationEvent.Id))
-                    {
-                        _logger.LogTrace("Handle {@integrationEvent}", integrationEvent);
-                        var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-                        await Task.Yield();
-                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
-                    }
-                }
-                else if (typeof(IMessageHandler).IsAssignableFrom(subscription.HandlerType))
+                if (typeof(IMessageHandler).IsAssignableFrom(subscription.HandlerType))
                 {
                     var rabbitMessage = _jsonSerializer.Deserialize(message, subscription.MessageType);
 
@@ -237,21 +234,6 @@ public class RabbitMqConsumer : IDisposable
         }
 
         return methodsParams;
-    }
-
-    private IIntegrationEvent GetIntegrationEvent(string message, Type eventType)
-    {
-        try
-        {
-
-            var integrationEvent = (IIntegrationEvent)_jsonSerializer.Deserialize(message, eventType);
-            return integrationEvent;
-        }
-        catch (Exception e)
-        {
-            _logger.LogCritical(e, "Unable to deserialize {Message} to {Type}", message, eventType.FullName);
-            throw;
-        }
     }
 
     public void StopConsuming()

@@ -24,7 +24,7 @@ public class RabbitMqProducer
         _channel = _rabitMqPersistenceConnection.CreateModel();
     }
 
-    public void Publish(object model, string? routingKey = null, Dictionary<string, object>? headers = null)
+    public void Publish(object model, string? routingKey = null, string? exchange= null, Dictionary<string, object>? headers = null)
     {
         _rabitMqPersistenceConnection.TryConnect();
         if (routingKey == null)
@@ -65,7 +65,7 @@ public class RabbitMqProducer
         {
 
             _channel.BasicPublish(
-                exchange: "exchange1",
+                exchange: exchange,
                 //exchange: _options.Value.Exchange,
                 routingKey: routingKey,
                 mandatory: true,
