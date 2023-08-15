@@ -22,8 +22,9 @@ build.Services
 var producer = build.Services.GetRequiredService<RabbitMqProducer>();
 for (int i = 0; i < 100; i++)
 {
-    producer.Publish(new AccountCreatedIntegrationEvent(), "fake_name");
-    producer.Publish(new { val = "123", count = i }, "fake");
+    //producer.Publish(new AccountCreatedIntegrationEvent(), exchange: "exchange1");
+    //producer.Publish(new AccountCreatedIntegrationEvent(), "fake_name", exchange: "exchange1");
+    producer.Publish(new { val = "123", count = i }, "dynamic_rk", exchange: "exchange1");
 }
 build.Run();
 
@@ -42,13 +43,10 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
                         var tenantId = GetTenantId(basicDeliverEventArgs);
                         currentContext.TenantId = tenantId;
                     });
-
                 })
                 .UseRabbitMq(Assembly.GetAssembly(typeof(MessageController)))
-                .AddHandlers(Assembly.GetAssembly(typeof(AccountCreatedIntegrationEventHandler)))
-                //.AddSingleton<RabbitMqConsumerManager>()
-                .AddTransient<RabbitMqConsumer>()
-                .AddTransient<RabbitMqProducer>()
+                .AddEventHandlers(Assembly.GetAssembly(typeof(AccountCreatedIntegrationEventHandler)))
+                .AddMessageHandlers(Assembly.GetAssembly(typeof(AccountCreatedIntegrationEventHandler)))
                 .AddScoped<ICurrentContext, CurrentContext>()
                 .AddScoped<IFakeService, FakeService>()
 
@@ -91,7 +89,3 @@ namespace Console
         public string TenantId { get; set; }
     }
 }
-//var logger = serviceProvider.GetService<ILoggerFactory>()
-//    .CreateLogger<Program>();
-//logger.LogDebug("Starting application");
-

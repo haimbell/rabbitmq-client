@@ -28,7 +28,7 @@ public class MessageController : BrokerControllerBase
         [FromService] IFakeService handler, BasicDeliverEventArgs eventArgs, CancellationToken stoppingToken = default)
     {
         handler.Do();
-        _logger.LogInformation("Handle1 {CorrelationId}", Context?.CorrelationId);
+        _logger.LogInformation("Handle2 {CorrelationId}", Context?.CorrelationId);
         return Task.CompletedTask;
     }
 
@@ -37,6 +37,15 @@ public class MessageController : BrokerControllerBase
         [FromService] AccountCreatedIntegrationEventHandler handler, BasicDeliverEventArgs eventArgs, CancellationToken stoppingToken = default)
     {
         _logger.LogInformation("Handle2");
+        return Task.CompletedTask;
+    }
+
+
+    [MessageHandler("exchange1", "dynamic", "dynamic_rk")]
+    public Task HandleDynamic([Message] object dynamicMessage,
+        [FromService] AccountCreatedIntegrationEventHandler handler, BasicDeliverEventArgs eventArgs, CancellationToken stoppingToken = default)
+    {
+        _logger.LogInformation("HandleDynamic {MessageId} {@dynamicMessage}", dynamicMessage, eventArgs.BasicProperties.MessageId);
         return Task.CompletedTask;
     }
 }

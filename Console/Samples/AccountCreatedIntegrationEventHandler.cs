@@ -10,8 +10,6 @@ public class AccountCreatedIntegrationEventHandler : IIntegrationEventHandler<Ac
     public AccountCreatedIntegrationEventHandler(ILogger<AccountCreatedIntegrationEventHandler> logger)
     {
         _logger = logger;
-
-
     }
 
     public async Task Handle(AccountCreatedIntegrationEvent affiliateCreated)
