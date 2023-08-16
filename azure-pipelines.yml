@@ -45,15 +45,22 @@ steps:
     
     includesymbols: true
     includesource: true
+    nobuild: true
     # versioningScheme: 'byBuildNumber'
     # versionEnvVar: 'Build.BuildNumber'    
     # versioningScheme: 'byBuildNumber'
     versionEnvVar: 'nugetVersion'
     versioningScheme: 'byEnvVar'
-
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   inputs:
     command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: '4ac8b36e-4003-4fcc-b590-9a5e80dd0e5b/01b4d2f5-6eab-4dee-b87f-7b20199cbeb0'
+    allowPackageConflicts: true
+# - task: DotNetCoreCLI@2
+#   inputs:
+#     command: 'push'
+#     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+#     nuGetFeedType: 'internal'
+#     publishVstsFeed: '4ac8b36e-4003-4fcc-b590-9a5e80dd0e5b/01b4d2f5-6eab-4dee-b87f-7b20199cbeb0'
