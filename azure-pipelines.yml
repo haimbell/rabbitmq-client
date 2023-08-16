@@ -13,10 +13,10 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  majorVersion: 1
-  minorVersion: 0
-  Build.BuildNumber: $(BuildDefinitionName)_$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r).
-
+  major: '1'
+  minor: '0'
+  revision: $[counter(variables['minor'], 1)] # This will get reset every time minor gets bumped.
+  nugetVersion: '$(major).$(minor).$(revision)'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -43,9 +43,12 @@ steps:
     packagesToPack: '**/*.csproj'
     includesymbols: true
     includesource: true
-    versioningScheme: 'byBuildNumber'
-    versionEnvVar: 'Build.BuildNumber'    
     # versioningScheme: 'byBuildNumber'
+    # versionEnvVar: 'Build.BuildNumber'    
+    # versioningScheme: 'byBuildNumber'
+    versionEnvVar: 'nugetVersion'
+    versioningScheme: 'byEnvVar'
+
 - task: DotNetCoreCLI@2
   inputs:
     command: 'push'
