@@ -21,7 +21,8 @@ steps:
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
-
+- script: echo "The build number is $(BUILD_BUILDNUMBER)"
+  displayName: 'Print Build Number'
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
