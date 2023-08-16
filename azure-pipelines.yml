@@ -13,7 +13,8 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-
+  majorVersion: 1
+  minorVersion: 0
 steps:
 - task: NuGetToolInstaller@1
 
@@ -39,6 +40,8 @@ steps:
     includesymbols: true
     includesource: true
     versioningScheme: 'byBuildNumber'
+    versionEnvVar: 'Build.BuildNumber'    
+    # versioningScheme: 'byBuildNumber'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'push'
