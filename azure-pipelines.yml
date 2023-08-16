@@ -15,6 +15,9 @@ variables:
   buildConfiguration: 'Release'
   majorVersion: 1
   minorVersion: 0
+  Build.BuildNumber: $(BuildDefinitionName)_$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r).
+
+
 steps:
 - task: NuGetToolInstaller@1
 
